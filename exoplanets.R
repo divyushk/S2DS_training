@@ -1,44 +1,70 @@
 setwd("C:/Users/k1599153/OneDrive - King's College London/exoplanets")
+
 #####
 library(tidyverse)
 exoplanets <- read_csv("exoplanets.csv")
 view(exoplanets)
+
 ####Question 1####
 
-str(exoplanets)
+number_of_records <- nrow(exoplanets)
 
-####There are 4521 records in the dataframe
+#There are 4521 records in the dataframe
 
 ####Question 2####
 
-colnames(exoplanets)
+column_names <- colnames(exoplanets)
+print(column_names)
 
 ####Question 3####
-exoplanets %>%
-  mutate(round(exoplanets$planet_orbital_period_(days), digits = 0))
 
-
-exoplanets %>%
-  round(`planet_orbital_period_(days)`, digits = 0) %>%
-  summarize(mean = mean(`planet_orbital_period_(days)`))
-
-exoplanets$orbital <- rename(exoplanets, orbital, planet_orbital_period_(days))
-  
+mean_orbital_period <- mean(exoplanets$`planet_orbital_period_(days)`, na.rm = TRUE)
+print(mean_orbital_period)
+median_orbital_period <- median(exoplanets$`planet_orbital_period_(days)`, na.rm = TRUE)
+print(median_orbital_period)
 
 ####Question 4####
-ggplot(exoplanets, aes(x = discovery_method)) +
-  geom_bar()
 
-####Answer: Transit
+top_discovery_method <- exoplanets %>% 
+  count(discovery_method) %>%  
+  arrange(desc(n))
+
+popular_discovery_method <- top_n(top_discovery_method, 1)
+print(popular_discovery_method)[1]
+
+#Answer: Transit
 
 ####Question 5####
 
-exoplanets %>%
+planet_mass <- exoplanets %>%
   filter(discovery_method == "Transit") %>%
-  group_by(planet_name) %>%
-  summarize(mean(`planet_mass_(earths)`))
-####Answer: CoRoT-14 b 2415 earths
+  arrange(desc(`planet_mass_(earths)`))
+view(planet_mass)
 
-####Question 7
-exoplanets %>%
-  ggplot(exoplanets, aes(x = `system_distance_from_earth_(pc)`, y = ))
+largest_mass <- top_n(planet_mass, 1, wt = planet_mass$`planet_mass_(earths)`)
+print(largest_mass)
+
+####Answer: K2-52 b 457000 earths
+
+####Question 6####
+
+exoplanets2 <- exoplanets %>% 
+  filter(`planet_mass_(earths)` < 450000)
+
+largest_mass2 <- top_n(exoplanets2, 1, wt = exoplanets2$`planet_mass_(earths)`)
+print(largest_mass2)
+
+#Answer: Kepler-840 b; mass = 43000 earths
+
+####Question 7####
+
+exoplanets2 %>% 
+  ggplot(aes(x = `system_distance_from_earth_(pc)`, 
+             y = `star_mass_(suns)`, 
+             color = discovery_method)) +
+  geom_jitter() +
+  labs(x = "Distance from Earth", y = "The mass of the star in suns")
+
+
+
+

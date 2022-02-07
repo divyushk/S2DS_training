@@ -65,6 +65,16 @@ exoplanets2 %>%
   geom_jitter() +
   labs(x = "Distance from Earth", y = "The mass of the star in suns")
 
+####Question 8####
 
+scatterplot <- function(var1, var2) {
+  exoplanets2 %>% 
+    ggplot(aes(x = var1, 
+               y = var2,
+               color = discovery_method)) +
+    geom_jitter()
+}
+
+scatterplot(exoplanets2$`star_luminosity_(abs)`, exoplanets2$`star_temp_(K)`)
 
 

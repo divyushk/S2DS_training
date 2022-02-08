@@ -1,4 +1,4 @@
-setwd("C:/Users/k1599153/OneDrive - King's College London/exoplanets")
+# setwd("C:/Users/k1599153/OneDrive - King's College London/exoplanets")
 
 #####
 library(tidyverse)

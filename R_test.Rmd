@@ -1,0 +1,250 @@
+---
+title: "tennis_01"
+author: "Divyush"
+date: "20/02/2022"
+---
+
+# Background
+
+The exercise uses statistics from the WTA (Women's Tennis Association) presented in two CSV files: 
+
+1. `players.csv`: information about the players 
+2. `matches.csv`: information about the matches
+
+You will need both for this exercise. An in-depth description of these datasets are made available through **[this Kaggle challenge](https://www.kaggle.com/joaoevangelista/wta-matches-and-rankings)** (https://www.kaggle.com/joaoevangelista/wta-matches-and-rankings). They were originally collected by **[Jeff Sackmann](https://github.com/JeffSackmann)** (https://github.com/JeffSackmann). 
+
+This exercise will help Pivigo understand your coding and technical skills. It is designed to be difficult to complete in the time allowed, so don't be discouraged if you can't complete all of the questions. 
+
+**Please take the time to read each question carefully!** 
+
+Good luck!
+
+# Setup
+Load data files
+
+```{r load_data}
+
+library(tidyverse)
+library(janitor)
+
+matches <- read_csv("matches.csv") %>% 
+  janitor::clean_names()
+
+players <- read_csv("players.csv") %>% 
+  janitor::clean_names()
+
+```
+
+# Question 1
+How many rows are there in the players and matches files? Please provide 2 numbers. 
+```{r q01}
+
+nrow_players <- nrow(players)
+nrow_matches <- nrow(matches)
+
+```
+
+## **Answer:** 
+
+Number of rows
+Players = 20662
+Matches = 50577
+
+***
+
+# Question 2
+What is the value in the 33rd row, 3rd column of the players dataset? 
+
+```{r q02}
+
+players[33,3]
+
+```
+## **Answer:** 
+
+"Williams"
+
+***
+
+# Question 3
+What is the smallest ID recorded in the `winner_id` column in the matches dataset?
+
+```{r q03}
+
+matches %>% 
+  summarize_if(is.numeric, min)
+
+```
+
+## **Answer:** 
+
+smallest ID recorded in the `winner_id` column is 200001
+***
+
+# Question 4
+What is the average age of losers as recorded in the matches dataset? Please ignore the missing values and round to 2 decimal places. 
+
+```{r q04}
+
+round(mean(matches$loser_age, na.rm = TRUE), 2)
+
+# matches %>%
+#   select(loser_age) %>% 
+#   summarize(mean = mean(.data$loser_age, na.rm = TRUE)) %>% 
+#   round(2) %>% 
+#   unlist()
+# mean(matches$loser_age, na.rm = TRUE) %>% 
+#   round(2)
+
+```
+
+## **Answer:** 
+
+The average age of losers as recorded in the matches dataset is 23.91 years
+
+***
+
+# Question 5
+Merge the 2 datasets. Use column `player_id` from players and `winner_id` from matches for the merge. How many rows does the resulting dataset contain? 
+
+```{r q05}
+
+players_matches <- merge(players, matches, by.x = "player_id", by.y = "winner_id")
+nrow(players_matches)
+
+players_matches3 <- inner_join(players, matches, by = c("player_id" = "winner_id"))
+nrow(players_matches3)
+
+```
+
+## **Answer:** 
+
+Number of rows = 50577
+
+***
+
+# Question 6
+What is the name of the winner with the smallest ID (as recorded in the `winner_id` column) in the matches dataset? Hint: locate the smallest value in the `winner_id` column, and examine the entire row. Please provide both a first name and last name. 
+
+```{r q06}
+
+filtered_matches <- matches %>% 
+  filter(winner_id == 200001)
+unique(filtered_matches$winner_name)
+
+```
+
+## **Answer:** 
+
+The winner with the smallest ID is Martina Hingis
+
+***
+
+# Question 7
+How many matches did **Serena Williams** win at the **Grand Slam** level? The level of the matches are recorded in the `tourney_level` column. The value assigned to Grand Slam events is `G`. 
+
+```{r q07}
+
+serena_williams <- players_matches %>% 
+  filter(winner_name == "Serena Williams" & tourney_level == "G") %>%
+  count()
+
+players_matches2 <- players_matches %>%
+  filter(tourney_level == "G") %>%
+  group_by(winner_name) %>% 
+  mutate(n_grand_slam_wins = n())
+
+```
+
+## **Answer:** 
+
+**Serena Williams** won 297 matches at the **Grand Slam** level
+
+***
+
+# Question 8
+Write a function which takes a player's name as a string parameter. The function should print out the number of Grand Slam events that this player has won. 
+```{r q08}
+
+grand_slam_wins <- function(x) {
+  players_matches %>% 
+    filter(tourney_level == "G" & winner_name == x) %>%
+    count()
+}
+
+```
+
+***
+
+# Question 9
+Plot the number of Grand Slam tournaments Serena Williams won in each tourney. The name of the tournaments are recorded in the `tourney_name` column of the matches dataset. Note: do not worry about different spellings of tournament names, display them as they appear in the dataset. 
+
+```{r 09}
+
+players_matches %>% 
+  filter(winner_name == "Serena Williams" & tourney_level == "G") %>% 
+  ggplot(aes(x = tourney_name)) +
+  geom_bar()
+
+```
+
+## **Answer:** 
+
+
+***
+
+# Question 10
+There is a difference in the spelling of one of the tourney names: "US Open"" is also spelled as "Us Open". Please rename all values of "Us Open" in the `tourney_name` column to "US Open". 
+
+```{r 10}
+
+players_matches[players_matches == "Us Open"] <- "US Open"
+
+```
+
+## **Answer:** 
+
+
+***
+
+# Question 11
+Now that we know the number of wins by Serena Williams, we would like to understand it better. It is often useful to think about quantities in relative terms. How would you compare the number of Grand Slam wins by Serena Williams to wins by other players? 
+
+```{r 11}
+
+players_matches2 %>% 
+  filter(tourney_level == "G") %>% 
+  ggplot(aes(x = 1,
+             y = n_grand_slam_wins)) +
+  geom_boxplot()
+
+```
+
+## **Answer:** 
+
+
+***
+
+# Question 12
+It is possible that left-handed players are at an advantage against right-handed players. Based on this dataset, how would you test this hypothesis? How would you investigate whether the surface has any influence on this relationship? 
+
+```{r 12}
+
+players_matches2 %>% 
+  ggplot(aes(x = 1,
+             y = n_grand_slam_wins)) +
+  geom_boxplot() +
+  facet_wrap(~ winner_hand)
+
+players_matches2 %>% 
+  ggplot(aes(x = 1,
+             y = n_grand_slam_wins)) +
+  geom_boxplot() +
+  facet_grid(surface ~ winner_hand)
+
+```
+
+## **Answer:** 
+
+
+***

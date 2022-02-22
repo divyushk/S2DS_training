@@ -1,0 +1,84 @@
+---
+title: "R Notebook"
+output:
+  html_document: default
+  html_notebook: default
+---
+
+## These questions are based on the Titanic dataset from Kaggle. Please be sure to run each code chunk by pressing cmd-shift-return within each.
+
+```{r}
+library(tidyverse)
+library(janitor)
+```
+
+## 1. Import the file "train.csv" from the working directory and store in a pandas data frame called "df". Make "PassengerId" the index. Print the first few lines of the data frame.
+
+```{r dataset}
+
+train <- read_csv("train.csv") %>% 
+  janitor::clean_names()
+
+```
+
+## 2. Plot a histogram of passenger ages
+
+```{r}
+
+train %>% 
+  ggplot(aes(x = age)) +
+  geom_histogram()
+
+```
+
+## 3. The following plot shows a density plot of passenger ages. Produce a similar plot in which the values for male and female passengers are plotted separately on the same plot.
+
+```{r}
+train %>% 
+  ggplot(aes(x = age)) +
+  geom_density() +
+  facet_wrap(~ sex)
+```
+
+## 4. What was the average age of male passengers? Female passengers?
+
+```{r}
+
+train %>% 
+  group_by(sex) %>% 
+  summarize(mean_age = mean(age, na.rm = TRUE))
+
+```
+
+## 5. What percentage of passengers survived?
+
+```{r}
+
+train %>% 
+  summarize(round((survival_rate = sum(survived) / length(survived) * 100), 2)) %>% 
+  unlist()
+
+survival_table <- table(train$survived)
+survival_table <- round(100*prop.table(survival_table),2)
+
+```
+
+## 6. What are the percentages of each value for "Embarked"?
+
+```{r}
+
+embarked_table <- table(train$embarked)
+embarked_table <- round(100*prop.table(embarked_table),2)
+
+barplot(embarked_table)
+
+```
+
+## 7. What is the first argument for the function dplyr::mutate?
+
+```{r}
+
+?mutate
+
+```
+
